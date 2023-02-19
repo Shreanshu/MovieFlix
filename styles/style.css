@@ -59,6 +59,7 @@ body {
     width: 100vw;
     height: 120vh;
     z-index: 1;
+    opacity: 0.6;
 
     position: absolute;
     top: -16vh;
@@ -603,7 +604,7 @@ body {
     }
 
     .searchbar .input {
-        padding: 6px 20px 6px 4px;
+        padding: 4px 20px 4px 4px;
         font-size: 1.6rem;
     }
 

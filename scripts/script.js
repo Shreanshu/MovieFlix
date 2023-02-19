@@ -57,7 +57,7 @@
         
         movieList.forEach( (movie) => {
             movieSuggestions.innerHTML += `
-            <a class="movie" href="#movie-details" id="${movie.imdbID}">
+            <a class="movie" id="${movie.imdbID}">
                 <div class="thumbnail">
                     <img src="${movie.Poster !== 'N/A' ? movie.Poster : './assets/ImageNotFound.png'}" alt="Movie Thumbnail" class="thumbnail-icon">
                 </div>
@@ -89,6 +89,8 @@
 
         searchList.forEach( (listItem) => {
             listItem.addEventListener('click', async () => {
+                window.scrollBy(0, window.innerHeight);
+
                 await fetch(`https://www.omdbapi.com/?i=${listItem.id}&apikey=${OMDB_API_KEY}`)
                 .then( async (response) => response.status !== 404 ? await response.json() : null )
                 .then( (movieData) => selectedMovie = movieData )
