@@ -65,16 +65,17 @@ body {
     top: -16vh;
 }
 
-.upper-section .mask {
-    width: 100%;
-    height: 100%;
-    background-color: black;
-    opacity: 0.3;
+.upper-section .upper-mask {
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--color-black);
 
     position: absolute;
     top: 0;
     left: 0;
     z-index: 2;
+
+    display: none;
 }
 
 .lower-section {
@@ -453,7 +454,19 @@ body {
     }
 
     .upper-section iframe {
+        width: 1000vw;
+        height: 120vh;
+        z-index: 1;
+        opacity: 0.6;
+
+        position: absolute;
         top: 100vh;
+        left: 0;
+        transform: translateX(-50%);
+    }
+
+    .upper-section .upper-mask {   
+        display: block;
     }
 
     .lower-section .credits {
