@@ -3,6 +3,7 @@
     const OMDB_API_KEY = '7b25a22';
     const TMDB_API_KEY = '730b6f5541f273620f50d001d1738c9e';
     let movieList = [];
+    let youTubeKey = "P9mwtI82k6E";
 
 
 
@@ -14,13 +15,27 @@
     let movieDetails = document.getElementById('movie-details');
     let trailer = document.getElementById('trailer');
     let trailerSource = trailer.getAttribute('src');
+
+    let trailerMaskSmallscreen = document.getElementById('trailer-mask-smallscreen');
+    let trailerContainerSmallscreen = document.getElementById('trailer-container-smallscreen');
+    let trailerSmallscreen = document.getElementById('trailer-smallscreen');
+    let viewTrailer = document.getElementById('view-trailer');
+    let hideTrailer = document.getElementById('hide-trailer');
+
     let loadingAnimation = document.getElementById('loading');
 
 
 
     searchMovie.addEventListener('keyup', () => { FindSuggestions(); DisplayCancelIcon(); ToggleTrailer() });
-    searchMovie.addEventListener('focus', () => { FindSuggestions(); DisplayCancelIcon(); });
+    // searchMovie.addEventListener('change', () => { FindSuggestions(); DisplayCancelIcon(); ToggleTrailer() });
+    searchMovie.addEventListener('focus', (event) => { FindSuggestions(); DisplayCancelIcon(); HideTrailerSmallscreen(event) });
+
     cancelIcon.addEventListener('click', DeleteSearch);
+
+    viewTrailer.addEventListener('click', (event) => DisplayTrailerSmallscreen(event, youTubeKey));
+    viewTrailer.addEventListener('touchstart', (event) => DisplayTrailerSmallscreen(event, youTubeKey));
+    hideTrailer.addEventListener('click', (event) => HideTrailerSmallscreen(event));
+    hideTrailer.addEventListener('touchstart', (event) => HideTrailerSmallscreen(event));
 
 
 
@@ -88,7 +103,10 @@
         let selectedTrailer;
 
         searchList.forEach( (listItem) => {
-            listItem.addEventListener('click', async () => {
+            listItem.addEventListener('click', FetchMovieAndTrailer);
+            listItem.addEventListener('touchstart', FetchMovieAndTrailer);
+
+            async function FetchMovieAndTrailer() {
                 window.scrollBy(0, window.innerHeight);
 
                 await fetch(`https://www.omdbapi.com/?i=${listItem.id}&apikey=${OMDB_API_KEY}`)
@@ -101,19 +119,21 @@
                 .then( (movieTrailer) => selectedTrailer = movieTrailer )
                 .catch( (error) => console.log(error) );
 
+                DeleteSearch();
+                
                 DisplayMovie(selectedMovie);
 
-                let key;
                 if(selectedTrailer)
                     {
                         selectedTrailer?.results.forEach( (result) => {
                             if(result?.type === 'Trailer' || result?.type === 'Teaser')
-                                key = result?.key;
+                                youTubeKey = result?.key;
                         });
                     }
                 
-                DisplayTrailer(key);
-            });
+                if(window.innerWidth > 1150)
+                    DisplayTrailer(youTubeKey);
+            }
         });
     }
 
@@ -123,7 +143,6 @@
 
             let outerSpan = document.createElement('span');
             outerSpan.classList.add('genre-list');
-            // outerSpan.id = 'genres';
 
             genreList.forEach( (genre) => {
                 let innerSpan = document.createElement('span');
@@ -170,8 +189,6 @@
         `<img src="./assets/ImageNotFound.png" alt="Movie">`;
 
         document.getElementById('genres').append(CreateGenre());
-
-        DeleteSearch();
     }
 
     function DisplayTrailer(key) {
@@ -186,7 +203,29 @@
             {
                 trailerSource = "";
                 trailer.setAttribute('src', trailerSource);
+
+                youTubeKey = "";
             }
+    }
+
+
+
+    function DisplayTrailerSmallscreen(event, key) {
+        event.preventDefault();
+
+        trailerMaskSmallscreen.style.display = 'block';
+        trailerContainerSmallscreen.style.display = 'block';
+        trailerSmallscreen.setAttribute('src', `https://www.youtube-nocookie.com/embed/${key}?playlist=${key}&autoplay=1&autopause=0&mute=0&controls=0&loop=1&rel=0&enablejsapi=1&color=white&border=0&showinfo=0&showsearch=0&fs=1&hl=en_U&iv_load_policy=3`);
+        hideTrailer.style.display = 'block';
+    }
+
+    function HideTrailerSmallscreen(event) {
+        event.preventDefault();
+
+        trailerMaskSmallscreen.style.display = 'none';
+        trailerContainerSmallscreen.style.display = 'none';
+        trailerSmallscreen.setAttribute('src', "");
+        hideTrailer.style.display = 'none';
     }
 
 
