@@ -3,6 +3,7 @@
     const OMDB_API_KEY = '7b25a22';
     const TMDB_API_KEY = '730b6f5541f273620f50d001d1738c9e';
     let movieList = [];
+    let poster = "./assets/MoviePoster-TSR.jpg";
     let youTubeKey = "P9mwtI82k6E";
 
 
@@ -16,6 +17,9 @@
     let trailer = document.getElementById('trailer');
     let trailerSource = trailer.getAttribute('src');
 
+    document.getElementById('app-title').addEventListener('click', () => window.location.reload() );
+
+    let posterBackground = document.getElementById('poster-background');
     let trailerMaskSmallscreen = document.getElementById('trailer-mask-smallscreen');
     let trailerContainerSmallscreen = document.getElementById('trailer-container-smallscreen');
     let trailerSmallscreen = document.getElementById('trailer-smallscreen');
@@ -33,9 +37,7 @@
     cancelIcon.addEventListener('click', DeleteSearch);
 
     viewTrailer.addEventListener('click', (event) => DisplayTrailerSmallscreen(event, youTubeKey));
-    viewTrailer.addEventListener('touchstart', (event) => DisplayTrailerSmallscreen(event, youTubeKey));
     hideTrailer.addEventListener('click', (event) => HideTrailerSmallscreen(event));
-    hideTrailer.addEventListener('touchstart', (event) => HideTrailerSmallscreen(event));
 
 
 
@@ -50,7 +52,7 @@
 
 
     function FindSuggestions() {
-        if (searchMovie.value.length > 1)
+        if (searchMovie.value.length > 0)
             {
                 FetchMovieList(searchMovie.value.trim());
                 DisplaySuggestions();
@@ -63,6 +65,17 @@
         .then( (movieData) => {
             if (movieData.Response === 'True')
                 movieList = movieData.Search;
+            else
+                {
+                    movieSuggestions.innerHTML = `
+                    <a class="movie">
+                        <div class="movie-details">
+                            <p class='error' style='margin: 0'>
+                                No movies found
+                            </p>
+                        </div>
+                    </a>`
+                }
         })
         .catch( (error) => console.log(error) );
     }
@@ -76,7 +89,6 @@
                 <div class="thumbnail">
                     <img src="${movie.Poster !== 'N/A' ? movie.Poster : './assets/ImageNotFound.png'}" alt="Movie Thumbnail" class="thumbnail-icon">
                 </div>
-
                 <div class="movie-details">
                     <p>
                         ${movie.Title}
@@ -104,7 +116,6 @@
 
         searchList.forEach( (listItem) => {
             listItem.addEventListener('click', FetchMovieAndTrailer);
-            listItem.addEventListener('touchstart', FetchMovieAndTrailer);
 
             async function FetchMovieAndTrailer() {
                 window.scrollBy(0, window.innerHeight);
@@ -128,8 +139,12 @@
                         selectedTrailer?.results.forEach( (result) => {
                             if(result?.type === 'Trailer' || result?.type === 'Teaser')
                                 youTubeKey = result?.key;
+                            else
+                                youTubeKey = "";
                         });
                     }
+                else
+                    youTubeKey = "";
                 
                 if(window.innerWidth > 1150)
                     DisplayTrailer(youTubeKey);
@@ -184,23 +199,31 @@
             </p>
         `;
 
+        poster = movie.Poster ? movie.Poster : "";
+
         moviePoster.innerHTML = movie.Poster !== 'N/A' ?
         `<img src="${movie.Poster}" alt="Movie">` :
-        `<img src="./assets/ImageNotFound.png" alt="Movie">`;
+        `<img src="./assets/ImageNotFound.png" alt="Movie Poster">`;
+
+        posterBackground.innerHTML = movie.Poster !== 'N/A' ?
+        `<img src="${movie.Poster}" alt="Movie Poster Background">` :
+        "";
 
         document.getElementById('genres').append(CreateGenre());
     }
 
-    function DisplayTrailer(key) {
-        trailer.style.display = 'block';
-        
+    function DisplayTrailer(key) {    
         if(key)
             {
+                trailer.style.display = 'block';
+
                 trailerSource = `https://www.youtube-nocookie.com/embed/${key}?playlist=${key}&autoplay=1&autopause=0&mute=0&controls=0&loop=1&rel=0&enablejsapi=1&color=white&border=0&showinfo=0&showsearch=0&fs=1&hl=en_U&iv_load_policy=3`;
                 trailer.setAttribute('src', trailerSource);
             }
         else
             {
+                trailer.style.display = 'none';
+
                 trailerSource = "";
                 trailer.setAttribute('src', trailerSource);
 
@@ -246,6 +269,12 @@
             {
                 cancelIcon.style.display = 'block';
                 loadingAnimation.style.display = 'block';
+
+                if(window.innerWidth < 1150)
+                    {
+                        viewTrailer.style.display = 'none';
+                        posterBackground.innerHTML = "";
+                    }
             }
         else
             {
@@ -254,6 +283,13 @@
 
                 movieSuggestions.innerHTML = "";
                 movieList = [];
+
+                if(window.innerWidth < 1150)
+                    {
+                        viewTrailer.style.display = 'block';
+                        posterBackground.innerHTML =
+                            `<img src="${poster}" alt="Movie Poster Background">`;
+                    }
             }
     }
 
@@ -267,6 +303,13 @@
         movieList = [];
         
         trailer.setAttribute('src', trailerSource);
+
+        if(window.innerWidth < 1150)
+            {
+                viewTrailer.style.display = 'block';
+                posterBackground.innerHTML =
+                    `<img src="${poster}" alt="Movie Poster Background">`;
+            }
     }
 
 })();
